@@ -1,0 +1,6 @@
+train: ../datasets/train/images
+val: ../datasets/valid/images
+
+nc: 8
+names: ['blue_ball', 'blue_goal', 'green_ball',
+        'green_goal', 'orange_ball', 'orange_goal', 'red_ball', 'red_goal']
