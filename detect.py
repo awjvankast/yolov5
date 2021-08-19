@@ -1,5 +1,14 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 """
+BRAM: scroll to below for my code. You will have to change some parameters there depending on the pixel size of your input
+In order to run inference on webcam for demo use this command in terminal:
+    python detect.py --weights runs/train/exp6/weights/best.pt --save-txt --line-thickness 6 --source
+In order to run inference on images in the data/val_im folder use
+    python detect.py --weights runs/train/exp6/weights/best.pt --save-txt --line-thickness 6 --source data/val_im
+
+
+
+
 Run inference on images, videos, directories, streams, etc.
 
 Usage:
@@ -25,6 +34,7 @@ from utils.general import check_img_size, check_requirements, check_imshow, colo
     apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path, save_one_box
 from utils.plots import colors, plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_sync
+import math
 
 
 @torch.no_grad()
@@ -195,8 +205,54 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
-                        with open(txt_path + '.txt', 'a') as f:
-                            f.write(('%g ' * len(line)).rstrip() % line + '\n')
+
+                        with open( txt_path + '.txt', 'a') as g:
+
+                            # !!!
+                            # Bram's code underneath
+                            # calculating the angle to the middle of the bb
+
+                            # CHANGE FOR OTHER INPUT SIZE IMAGE (WEBCAM OR .JPG)
+                            # Total amount of pixels for x and y, check which one your input images or webcame have and adjust for it
+                            # for 2592 x 1944 (large validation pictures)
+                            x_tot_pixel = 2592
+                            y_tot_pixel = 1944
+                            line_thick = 3
+
+                            # for 416 x 416 (small training pictures)
+                            #x_tot_pixel = 416
+                            #y_tot_pixel = 416
+                            #line_thick = 1
+
+                            x_mid = (xyxy[2].item() - xyxy[0].item()) /2 +xyxy[0].item()
+                            y_mid = (xyxy[3].item() - xyxy[1].item()) /2 +xyxy[1].item()
+
+                            A = y_tot_pixel-y_mid
+                            Bx = x_tot_pixel/2 - x_mid
+                            By = y_tot_pixel-y_mid
+                            B = math.sqrt(By**2 + Bx**2)
+                            if Bx>0:
+                                angle = 90 - math.degrees(math.acos(A/B))
+                            else:
+                                angle = 90 + math.degrees(math.acos(A / B))
+
+                            bb_area = str(xywh[2] * xywh[3])
+
+                            # calculating the estimated distance to ball or goal
+                            object_class = int(cls)
+                            distance_est = -1
+                            if bb_area != -1:
+                                if object_class == 0 or object_class == 2 or object_class == 4 or object_class == 6:
+                                    print('Ball detected; Class: '+str(object_class))
+                                    distance_est = 18.62*float(bb_area)**(-0.354)-31.51
+                                else:
+                                    print('Goal detected; Class: '+str(object_class))
+                                    distance_est = -2259*float(bb_area) + 234.9
+
+                            print("Estimated distance is: "+ str(distance_est) + " and estimated angle is: "+str(angle))
+                            line2 = str(int(cls)).rstrip()  + ' ' + str(distance_est) +  ' ' + str(angle)
+                            g.write(line2 + '\n')
+                            cv2.line(im0, (int(x_mid), int(y_mid)), (int(x_tot_pixel/2), y_tot_pixel), (0, 255, 0), thickness=line_thick)
 
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
