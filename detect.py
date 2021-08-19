@@ -4,7 +4,7 @@ BRAM: scroll to below for my code. You will have to change some parameters there
 In order to run inference on webcam for demo use this command in terminal:
     python detect.py --weights runs/train/exp6/weights/best.pt --save-txt --line-thickness 6 --source
 In order to run inference on images in the data/val_im folder use
-    python detect.py --weights runs/train/exp6/weights/best.pt --save-txt --line-thickness 6 --source data/val_im
+    python detect.py --weights best.pt --save-txt --line-thickness 6 --source data/val_im
 
 
 
