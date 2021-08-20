@@ -2,17 +2,9 @@
 """
 BRAM: scroll to below for my code. You will have to change some parameters there depending on the pixel size of your input
 In order to run inference on webcam for demo use this command in terminal:
-    python detect.py --weights runs/train/exp6/weights/best.pt --save-txt --line-thickness 6 --source
+    python detect.py best.pt --save-txt --line-thickness 6 --source 0
 In order to run inference on images in the data/val_im folder use
     python detect.py --weights best.pt --save-txt --line-thickness 6 --source data/val_im
-
-
-
-
-Run inference on images, videos, directories, streams, etc.
-
-Usage:
-    $ python path/to/detect.py --source path/to/img.jpg --weights yolov5s.pt --img 640
 """
 
 import argparse
